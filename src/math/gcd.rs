@@ -43,7 +43,6 @@ where
     (x2, y2)
 }
 
-
 /*
 pub fn fact<T>(n:T)
 where
