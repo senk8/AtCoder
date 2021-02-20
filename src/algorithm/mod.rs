@@ -52,12 +52,25 @@ pub fn syakutori(vec:Vec<i128>,threshold:i128)->usize{
     let n = vec.len();
 
     for left in 0..n{
-        while right < n && sum < threshold {
+
+        /* 
+            vec[right] <= threshold は進め続ける時に、満たすべき条件
+        */ 
+        while right < n && sum + vec[right] <= threshold {
             sum += vec[right];
             right += 1;
         }
-        res += n- right + 1;
 
+        /* 
+            rightは条件を満たす最大なので、区間に対して何かを行う 
+        */
+        res += right - left;
+
+
+        /*
+            例えば、0==0だとrightが増えず、無限ループしてしまう。==ならそれはrightを一回も進めていないときだけだからsumも増えていないので、何もしなくてよい。
+            else節でleftを合計からひかないと、カーソルを進めてもleftが和に含まれてしまう
+        */
         if left == right {
             right += 1;
         }else{
@@ -70,6 +83,8 @@ pub fn syakutori(vec:Vec<i128>,threshold:i128)->usize{
 
 #[cfg(test)]
 mod tests {
+    use super::{bits_search, syakutori};
+
     #[test]
     fn test_acc_sum() {
         use super::acc_sum;
@@ -97,5 +112,20 @@ mod tests {
         assert_eq!(9, binary_search(&v2,45));
 
         assert_eq!(0, binary_search(&v3,0));
+    }
+
+
+    #[test]
+    fn test_syakutori() {
+        use super::syakutori;
+        let v1: Vec<i128> = vec![5, 3, 8, 6, 1, 4];
+
+        assert_eq!(11, syakutori(v1,12));
+    }
+    #[test]
+    fn test_bits_search() {
+        use super::bits_search;
+
+        assert_eq!(12, bits_search(8));
     }
 }
