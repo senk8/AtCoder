@@ -43,42 +43,6 @@ where
     (x2, y2)
 }
 
-/*
-pub fn fact<T>(n:T)
-where
-    T: Num + Clone + Copy,
-{
-    let mut fact = n;
-
-    if n <= T::zero() { return 1;}
-
-    loop {
-        if n==T::zero() {
-            break;
-        }else{
-            fact *= n;
-        }
-    }
-
-    return fact;
-}
-
-pub fn comb<T>(n:T,r:T)
-where
-    T: Num + Clone + Copy,
-{
-    if r <= 0 { 1 }
-    else { factorial(n) / (factorial(r) * factorial(n - r)) }
-}
-
-pub fn sequence_sum<T>(a:T,n:T,d:T)->T
-where
-    T: Num + Clone + Copy,
-{
-    n*(2 as T*a+(n-1 as T)*d)/2 as T
-}
-*/
-
 #[cfg(test)]
 mod tests {
     #[test]
