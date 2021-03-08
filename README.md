@@ -7,6 +7,6 @@ AtCoder用ライブラリです。
 
 Union find木
 
--　代数
+- 代数
 
 GCD、LCM、素因数分解
