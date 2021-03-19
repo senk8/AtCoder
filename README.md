@@ -1,5 +1,5 @@
 # AtCoder
-AtCoder用ライブラリです。
+AtCoder用ライブラリです。Rustで書かれています。
 
 # AtCoder
 
