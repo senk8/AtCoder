@@ -11,27 +11,38 @@ using namespace std;
 #define elif else if 
 #define out(a) cout<<a<<endl
 using ll = long long;
+using ull = unsigned long long;
 using pll = pair<ll,ll>;
 using vvll = vector<vector<ll>>;
 using vll = vector<ll>;
 using vstr = vector<string>;
+using Graph = vector<vector<Edge>>;
 const ll MOD=1000000007;
 vll dx{0,1,0,-1};
 vll dy{1,0,-1,0};
 ll a,b,c,d,x,y,z,i,j,k,m,n,h,w,res,sum;
 string s,t,ans;
 vll vec1,vec2,vec3;
-vvll graph;
 vstr maze;
 bool flag;
 
-bool isOK(ll index,ll key) {
+
+struct Edge {
+    int to;
+    ll w;
+    Edge(int to,ll w):to(to),w(w){}
+};
+
+
+
+
+bool IsOk(ll index,ll key) {
     if (vec1[index] >= key) return true;
     else return false;
 }
 
 
-template <class type> void printVector(vector<type> vec){
+template <class type> void PrintVector(vector<type> vec){
     stringstream ss;
     n=vec.size();
     for(i=0;i<n;i++)
@@ -42,9 +53,14 @@ template <class type> void printVector(vector<type> vec){
     cout<<ss.str()<<endl;
 }
 
-template <class type> void inputVector(vector<type>& vec){
+template <class type> void InputVector(vector<type>& vec){
     for(i=0;i<vec.size();i++)cin>>vec[i];
 }
+
+ull GetDigit(ull num){
+    return std::to_string(num).length();
+}
+
 
 //--------------------------------------------------------------
 
@@ -55,21 +71,21 @@ struct UnionFind {
         for(int i = 0; i < N; i++) par[i] = i;
     }
 
-    int root(int x) { // データxが属する木の根を再帰で得る：root(x) = {xの木の根}
+    int Root(int x) { // データxが属する木の根を再帰で得る：root(x) = {xの木の根}
         if (par[x] == x) return x;
-        return par[x] = root(par[x]);
+        return par[x] = Root(par[x]);
     }
 
-    void unite(int x, int y) { // xとyの木を併合
-        int rx = root(x); //xの根をrx
-        int ry = root(y); //yの根をry
+    void Unite(int x, int y) { // xとyの木を併合
+        int rx = Root(x); //xの根をrx
+        int ry = Root(y); //yの根をry
         if (rx == ry) return; //xとyの根が同じ(=同じ木にある)時はそのまま
         par[rx] = ry; //xとyの根が同じでない(=同じ木にない)時：xの根rxをyの根ryにつける
     }
 
-    bool same(int x, int y) { // 2つのデータx, yが属する木が同じならtrueを返す
-        int rx = root(x);
-        int ry = root(y);
+    bool Same(int x, int y) { // 2つのデータx, yが属する木が同じならtrueを返す
+        int rx = Root(x);
+        int ry = Root(y);
         return rx == ry;
     }
 };
@@ -102,7 +118,7 @@ void BFS()
     }
 }
 
-vll accumlateSum(vll vec)
+vll AccumlateSum(vll vec)
 {
     vll asum=vll(n+1,0);
     asum[0]=0;
@@ -110,7 +126,7 @@ vll accumlateSum(vll vec)
     return asum;
 }
 
-void bitsSearch(){
+void BitsSearch(){
     sum=0;
     rep(bit,0,1<<n){
         rep(bitlen,0,n){
@@ -119,18 +135,18 @@ void bitsSearch(){
    }
 }
 
-ll binarySearch(ll key){
+ll BinarySearch(ll key){
     ll ng=-1;
     ll ok=vec1.size();
     while(1<abs(ok-ng)){
         ll mid=(ok+ng)/2;
-        if(isOK(mid,key))ok=mid;
+        if(IsOk(mid,key))ok=mid;
         else ng=mid;
     }
     return ok;
 }
 
-void syakutori(){
+void Syakutori(){
     ll res=0;
     ll sum=0;
     ll right=0;
@@ -139,15 +155,50 @@ void syakutori(){
             sum+=vec1[right];
             ++right;
         }
-        res += n-right+1;//rightまででk以上になっている。n-rightがleftを先頭とした部分列の全パターン
-        if(left==right)right++;//例えば0==0だ永遠に進まず困る。elseでいいのは==ならそれはrightを一回も進めていないときだけだからsumも増えていない
-        else sum -= vec1[left];//leftを合計からひかないと、カーソルを進めてもleftが和に含まれてしまう
+        res += n-right+1;       //rightまででk以上になっている。n-rightがleftを先頭とした部分列の全パターン
+        if(left==right)right++; //例えば0==0だ永遠に進まず困る。elseでいいのは==ならそれはrightを一回も進めていないときだけだからsumも増えていない
+        else sum -= vec1[left]; //leftを合計からひかないと、カーソルを進めてもleftが和に含まれてしまう
     }
 }
 
+//------------------ Graph Search-------------------------------
+
+
+const ll INF = 1LL << 60;
+
+vll Dijkstra(Graph G,ll start){
+    ll n = G.size();
+    vector<bool> used(n,false);
+    vll distance(n,INF);
+    distance[start]=0;
+
+    for(ll i=0;i<n;i++){
+        ll min_dist = INF;
+        ll min_v = -1;
+
+        // 使用していなくて、経路が存在するパスを探して,miv_vとする。
+        for(ll v=0;v<n;++v){
+            if(!used[v] && distance[v] < min_dist){
+                min_dist = distance[v];
+                min_v = v;
+            }
+        }
+        if(min_v == -1)break;
+
+
+        // min_vから行ける頂点を全て緩和する。
+        for(auto e:G[min_v]){
+            distance[e.to]=min(distance[e.to],distance[min_v]+e.w);
+        }
+        used[min_v] = true;
+    }
+    return distance;
+}
+
+
 //--------------------------------------------------------------
 
-int factorial(int n)
+int Factorial(int n)
 {
     int fact = n;
 
@@ -159,13 +210,13 @@ int factorial(int n)
     return fact;
 }
 
-int combination(int n, int r)
+int Combination(int n, int r)
 {
     if (r <= 0) return 1;
-    return factorial(n) / (factorial(r) * factorial(n - r));
+    return Factorial(n) / (Factorial(r) * Factorial(n - r));
 }
 
-vll enum_divisor(ll num)
+vll EnumDivisor(ll num)
 {
     set<long> tmp;
     for(long d=1;d*d<=n;d++){
@@ -189,16 +240,16 @@ ll LCM(ll a, ll b)
    return (a * b) / GCD(a, b);
 }
 
-ll seqSum(ll a,ll n,ll d){
+ll SeqSum(ll a,ll n,ll d){
     return n*(2*a+(n-1)*d)/2;
 }
 
-bool onQuad(ll x1,ll x2,ll y1,ll y2,ll x,ll y)
+bool OnQuad(ll x1,ll x2,ll y1,ll y2,ll x,ll y)
 {
     return (x2-x1)*(y-y1)==(y2-y1)*(x-x1);
 }
 
-vector<pll> prime_factorize(ll num)
+vector<pll> PrimeFactorize(ll num)
 {
     vector<pair<ll,ll>> res;
     for(ll p=2;p*p<=num;++p){
@@ -297,28 +348,20 @@ long long COM(int n, int k){
 
 using mint = Fp<MOD>;
 
-//--------------------------------------------------------------
 
-/*
-void manyIf()
-{
-    rep(i,0,n);
-    if();
-    if();
-    if();
-    if();
-    if();
-    if();
-    if();
-    if();
+ll BinPow(ll a, ll b) {
+	ll res = 1;
+	while (b != 0) {
+		if (b % 2 == 1) {
+			res = res * a % MOD;
+		}
+		a = a * a % MOD;
+		b /= 2;
+	}
+	return res;
 }
-*/
 
-/*
-if (m.find(key)!=m.end()) m[key]+=1,ma=max(m.at(key),ma);
-else m.insert(std::make_pair(key, 1)),ma=max(m.at(key),ma);
-*/
-
+//--------------------------------------------------------------
 
 void in(ll which)
 {
@@ -355,7 +398,7 @@ void in(ll which)
 
 //----------------------------------------
 
-void answer()
+void Answer()
 {
     in(0);
     out(res);
@@ -363,6 +406,6 @@ void answer()
 
 int main() 
 {
-    answer();
+    Answer();
     return 0;
 }
